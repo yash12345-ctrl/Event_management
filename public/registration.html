@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Registration</title>
-    <!-- Google Fonts: Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Icon Library (Feather Icons) -->
     <script src="https://unpkg.com/feather-icons"></script>
-    <!-- QR Code Generation Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
@@ -19,7 +16,6 @@
             --secondary-glow: rgba(90, 200, 255, 0.5);
         }
 
-        /* --- Global Styles & Resets --- */
         * {
             margin: 0;
             padding: 0;
@@ -67,7 +63,6 @@
             overflow: hidden;
         }
 
-        /* --- Left Info Panel --- */
         .info-panel {
             flex-basis: 40%;
             padding: 3rem;
@@ -125,7 +120,6 @@
             flex-shrink: 0;
         }
 
-        /* --- Right Form Panel --- */
         .form-panel {
             flex-basis: 60%;
             display: flex;
@@ -221,7 +215,6 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideInFromLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
         
-        /* --- Responsive Design --- */
         @media (max-width: 992px) {
             body { padding: 0; overflow-y: auto; }
             .page-container {
@@ -264,7 +257,6 @@
     <canvas id="background-canvas"></canvas>
 
     <div class="page-container">
-        <!-- Left Info Panel -->
         <div class="info-panel">
             <div class="logo-container">
                  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -281,10 +273,8 @@
             </ul>
         </div>
 
-        <!-- Right Form Panel -->
         <div class="form-panel">
             <main>
-                <!-- Registration Form View -->
                 <div id="registration-view" class="view">
                     <div class="form-container">
                         <h2>Create Your Pass</h2>
@@ -316,7 +306,6 @@
                     </div>
                 </div>
 
-                <!-- Registration Confirmation View -->
                 <div id="confirmation-view" class="view hidden">
                     <div class="confirmation-container">
                         <h2>Registration Successful!</h2>
@@ -337,7 +326,6 @@
     </div>
 
     <script>
-        // --- THIS ENTIRE SCRIPT SECTION IS UPDATED TO CONNECT TO THE SERVER ---
 
         feather.replace();
 

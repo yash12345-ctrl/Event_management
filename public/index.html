@@ -31,8 +31,9 @@
       height: 100%;
       object-fit: cover;
       z-index: 5;
-      transition: opacity 1.5s ease-out, visibility 1.5s;
+      transition: opacity 1s ease-out, visibility 1s;
       filter: brightness(0.7);
+      will-change: opacity, visibility;
     }
     
     #intro-video-background.exit {
@@ -49,23 +50,24 @@
       background-repeat: repeat;
       background-size: cover;
       z-index: -1;
+      will-change: background-position;
     }
     .stars {
       background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
-      animation: move-twink-back 200s linear infinite;
+      animation: move-twink-back 120s linear infinite;
     }
     .stars2 {
       background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
-      animation: move-twink-back 150s linear infinite;
+      animation: move-twink-back 90s linear infinite;
     }
     .stars3 {
       background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
-      animation: move-twink-back 100s linear infinite;
+      animation: move-twink-back 60s linear infinite;
     }
 
     @keyframes move-twink-back {
       from {background-position: 0 0;}
-      to {background-position: -10000px 5000px;}
+      to {background-position: -5000px 2500px;}
     }
     
     .intro {
@@ -87,18 +89,19 @@
       font-weight: 900;
       opacity: 0;
       transform: scale(0.5) rotate(-30deg);
-      animation: letterPop 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+      animation: letterPop 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
       margin: 0 1vw;
       background: linear-gradient(45deg, #ff6ec4, #7873f5, #4158D0, #C850C0);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 30px rgba(255, 110, 196, 0.8);
+      text-shadow: 0 0 15px rgba(255, 110, 196, 0.6);
+      will-change: transform, opacity;
     }
 
-    .intro span:nth-child(1) { animation-delay: 0.2s; }
-    .intro span:nth-child(2) { animation-delay: 0.4s; }
-    .intro span:nth-child(3) { animation-delay: 0.6s; }
-    .intro span:nth-child(4) { animation-delay: 0.8s; }
+    .intro span:nth-child(1) { animation-delay: 0.1s; }
+    .intro span:nth-child(2) { animation-delay: 0.3s; }
+    .intro span:nth-child(3) { animation-delay: 0.5s; }
+    .intro span:nth-child(4) { animation-delay: 0.7s; }
 
     @keyframes letterPop {
       to { opacity: 1; transform: scale(1) rotate(0deg); }
@@ -106,25 +109,26 @@
     
     .intro-subheading, .intro-tagline {
       opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInUp 1s forwards;
+      transform: translateY(15px);
+      animation: fadeInUp 0.8s forwards;
       color: rgba(255, 255, 255, 0.8);
       font-weight: 400;
       text-transform: uppercase;
+      will-change: transform, opacity;
     }
 
     .intro-subheading {
       font-size: clamp(1rem, 3vw, 1.5rem); 
-      letter-spacing: 0.4em;
+      letter-spacing: 0.3em;
       margin-bottom: 1rem;
-      animation-delay: 1.5s;
+      animation-delay: 1s;
     }
 
     .intro-tagline {
       font-size: clamp(0.9rem, 2.5vw, 1.2rem); 
-      letter-spacing: 0.5em;
+      letter-spacing: 0.4em;
       margin-top: 1rem;
-      animation-delay: 1.8s;
+      animation-delay: 1.2s;
     }
 
     @keyframes fadeInUp {
@@ -132,27 +136,28 @@
     }
 
     .intro.exit {
-      animation: zoomOut 1.5s forwards;
+      animation: zoomOut 1s forwards;
     }
 
     @keyframes zoomOut {
       from { opacity: 1; transform: scale(1);}
-      to { opacity: 0; transform: scale(5); visibility: hidden; }
+      to { opacity: 0; transform: scale(3); visibility: hidden; }
     }
 
     .container {
       text-align: center;
       z-index: 1;
       opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInMain 1s forwards;
-      animation-delay: 4s;
-      background: rgba(15, 15, 31, 0.4);
-      backdrop-filter: blur(5px);
-      padding: 5vw;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      transform: translateY(15px);
+      animation: fadeInMain 0.8s forwards;
+      animation-delay: 3s;
+      background: rgba(15, 15, 31, 0.3);
+      backdrop-filter: blur(3px);
+      padding: 4vw;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       max-width: 90%;
+      will-change: transform, opacity;
     }
 
     @keyframes fadeInMain {
@@ -166,41 +171,42 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 1rem;
-      text-shadow: 0 0 35px rgba(255, 110, 196, 0.7);
-      animation: textGlow 2s infinite alternate;
+      text-shadow: 0 0 20px rgba(255, 110, 196, 0.6);
+      animation: textGlow 1.5s infinite alternate;
     }
 
     @keyframes textGlow {
-      from { text-shadow: 0 0 35px rgba(255, 110, 196, 0.7); }
-      to { text-shadow: 0 0 50px rgba(120, 115, 245, 0.9); }
+      from { text-shadow: 0 0 20px rgba(255, 110, 196, 0.6); }
+      to { text-shadow: 0 0 30px rgba(120, 115, 245, 0.8); }
     }
 
     p {
-      font-size: clamp(1.2rem, 3.5vw, 1.5rem); 
-      margin-bottom: 2rem;
-      opacity: 0.9;
-      letter-spacing: 1px;
+      font-size: clamp(1.1rem, 3.5vw, 1.4rem); 
+      margin-bottom: 1.5rem;
+      opacity: 0.85;
+      letter-spacing: 0.8px;
     }
 
     .start-btn {
-      padding: 1em 3em;
-      font-size: clamp(1.2rem, 4vw, 1.6rem); 
+      padding: 0.9em 2.5em;
+      font-size: clamp(1.1rem, 4vw, 1.5rem); 
       font-weight: bold;
       color: #fff;
       background: linear-gradient(45deg, #ff416c, #ff4b2b);
       border: none;
-      border-radius: 50px;
+      border-radius: 40px;
       cursor: pointer;
       position: relative;
       overflow: hidden;
       transition: all 0.3s ease-in-out;
-      box-shadow: 0 0 25px rgba(255, 65, 108, 0.7);
+      box-shadow: 0 0 15px rgba(255, 65, 108, 0.6);
       animation: pulse 2s infinite;
+      will-change: transform, box-shadow;
     }
 
     @keyframes pulse {
       0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+      50% { transform: scale(1.04); }
       100% { transform: scale(1); }
     }
 
@@ -211,30 +217,30 @@
       left: 50%;
       width: 0;
       height: 0;
-      background: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.25);
       border-radius: 50%;
       transform: translate(-50%, -50%);
-      transition: width 0.5s, height 0.5s;
+      transition: width 0.4s, height 0.4s;
     }
     
     .start-btn:hover::before {
-      width: 250px;
-      height: 250px;
+      width: 200px;
+      height: 200px;
     }
 
     .start-btn:hover {
       animation-play-state: paused;
-      transform: scale(1.1);
-      box-shadow: 0 0 50px rgba(255, 65, 108, 1);
+      transform: scale(1.08);
+      box-shadow: 0 0 30px rgba(255, 65, 108, 0.9);
     }
     
     .start-btn:active {
-      transform: scale(1.05);
+      transform: scale(1.04);
     }
 
     @media (max-width: 480px) {
-      .intro span { margin: 0 4px; }
-      .container { padding: 1.5rem; }
+      .intro span { margin: 0 3px; }
+      .container { padding: 1.2rem; }
     }
   </style>
 </head>
@@ -244,7 +250,7 @@
   <div class="stars2"></div>
   <div class="stars3"></div>
 
-  <video autoplay loop muted playsinline id="intro-video-background">
+  <video autoplay loop muted playsinline preload="auto" id="intro-video-background">
     <source src="video.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
@@ -260,7 +266,7 @@
   </div>
 
   <div class="container">
-    <h1>🎉 CODE  FEST</h1>
+    <h1>🎉 CODE FEST</h1>
     <p>Prepare for an unforgettable night of music, codes, and energy!</p>
     <button class="start-btn" onclick="startEvent()">Launch</button>
   </div>
@@ -268,12 +274,12 @@
   <script>
     function startEvent() {
       const container = document.querySelector('.container');
-      container.style.transition = 'opacity 0.5s, transform 0.5s';
+      container.style.transition = 'opacity 0.4s, transform 0.4s';
       container.style.opacity = '0';
-      container.style.transform = 'translateY(50px)';
+      container.style.transform = 'translateY(40px)';
       setTimeout(() => {
         window.location.href = "login.html";
-      }, 500);
+      }, 400);
     }
 
     window.addEventListener('load', () => {
@@ -283,7 +289,7 @@
       setTimeout(() => {
         introText.classList.add("exit");
         introVideo.classList.add("exit");
-      }, 2500); 
+      }, 2000); 
     });
   </script>
 
