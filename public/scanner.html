@@ -172,6 +172,7 @@
         const attendanceStatusEl = document.getElementById('attendance-status');
         attendanceStatusEl.textContent = 'Marking attendance...';
         try {
+            // This is a placeholder for your actual API endpoint.
             const response = await fetch('/api/mark-attendance', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -212,6 +213,7 @@
         failureMessage.classList.add('hidden');
 
         try {
+            // This is a placeholder for your actual verification API endpoint.
             const response = await fetch(`/api/verify/${decodedText}`);
             if (response.ok) {
                 const userData = await response.json();
@@ -227,8 +229,6 @@
                 document.getElementById('detail-institution').textContent = userData.institution;
 
                 successDetails.classList.remove('hidden');
-                failureMessage.classList.add('hidden');
-
                 await markAttendance(userData);
             } else {
                 profileCard.className = 'profile-card failure';
@@ -236,66 +236,104 @@
                 resultIcon.outerHTML = '<i id="result-icon-svg" data-feather="x-circle"></i>';
                 resultTitle.textContent = 'Verification Failed';
                 document.getElementById('failed-id').textContent = decodedText;
-
-                successDetails.classList.add('hidden');
                 failureMessage.classList.remove('hidden');
             }
         } catch (error) {
+            console.error('Verification API error:', error);
             profileCard.className = 'profile-card failure';
+            profileHeader.className = 'profile-header failure';
+            resultIcon.outerHTML = '<i id="result-icon-svg" data-feather="x-circle"></i>';
             resultTitle.textContent = 'Verification Error';
-            failureMessage.querySelector('p').textContent = 'An unexpected error occurred.';
+            failureMessage.querySelector('p').textContent = 'An unexpected error occurred. Please check network and try again.';
             document.getElementById('failed-id').textContent = `Scanned Code: ${decodedText}`;
-            successDetails.classList.add('hidden');
             failureMessage.classList.remove('hidden');
+        } finally {
+            feather.replace();
         }
-
-        feather.replace();
     }
 
-    const onScanSuccess = (decodedText) => {
-        if (decodedText) { processScannedCode(decodedText); }
+    const onScanSuccess = (decodedText, decodedResult) => {
+        if (decodedText) {
+            processScannedCode(decodedText);
+        }
     };
-    const onScanFailure = () => {};
 
+    const onScanFailure = (error) => {
+        // This callback is called frequently, so we keep it minimal.
+    };
+    
     function startCameraScanner() {
         scannerView.classList.remove('hidden');
         resultView.classList.add('hidden');
-        statusElement.textContent = "Starting Camera...";
+        statusElement.textContent = "Locating cameras...";
+
         const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-        html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
-            .then(() => { statusElement.textContent = "Scanning for event pass..."; })
-            .catch(() => { statusElement.textContent = `Error: Please grant camera permissions.`; });
+
+        // ** THIS IS THE FIX **
+        // More robust camera selection logic for mobile devices.
+        Html5Qrcode.getCameras().then(devices => {
+            if (devices && devices.length) {
+                let cameraId = devices[0].id; // Default to the first camera
+                
+                // Prefer the rear camera if available
+                const rearCamera = devices.find(device => 
+                    device.label.toLowerCase().includes('back') || 
+                    device.label.toLowerCase().includes('environment')
+                );
+                
+                if (rearCamera) {
+                    cameraId = rearCamera.id;
+                }
+
+                // Start the scanner with the explicitly selected camera ID
+                html5QrCode.start(
+                    { deviceId: { exact: cameraId } },
+                    config,
+                    onScanSuccess,
+                    onScanFailure
+                ).then(() => {
+                    statusElement.textContent = "Scanning for event pass...";
+                }).catch(err => {
+                    console.error("Error starting camera:", err);
+                    statusElement.textContent = `Error: Could not start camera. Please grant permissions.`;
+                });
+            } else {
+                 statusElement.textContent = "Error: No cameras found on this device.";
+            }
+        }).catch(err => {
+            console.error("Error getting cameras:", err);
+            statusElement.textContent = `Error: Please grant camera permissions to see a list of cameras.`;
+        });
     }
 
     scanAnotherBtn.addEventListener('click', startCameraScanner);
-    uploadQrBtn.addEventListener('click', () => { qrFileInput.click(); });
+    uploadQrBtn.addEventListener('click', () => qrFileInput.click());
 
     qrFileInput.addEventListener('change', e => {
         const file = e.target.files[0];
         if (!file) return;
 
-        const stopCameraIfNeeded = () => {
+        const stopScannerIfNeeded = () => {
             if (html5QrCode.isScanning) {
-                return html5QrCode.stop();
+                return html5QrCode.stop().catch(err => console.error("Error stopping scanner for file upload.", err));
             }
             return Promise.resolve();
         };
 
-        stopCameraIfNeeded().then(() => {
+        stopScannerIfNeeded().then(() => {
             statusElement.textContent = "Scanning image...";
             return html5QrCode.scanFile(file, true);
         }).then(decodedText => {
             processScannedCode(decodedText);
         }).catch(err => {
-            processScannedCode("INVALID_QR_CODE");
-            console.error("Error scanning file: ", err);
+            processScannedCode("INVALID_OR_UNREADABLE_QR");
+            console.error("Error scanning file:", err);
         }).finally(() => {
             qrFileInput.value = '';
         });
     });
 
     document.addEventListener('DOMContentLoaded', startCameraScanner);
-</script>
-
-</body>
+    </script>
+    </body>
 </html>
