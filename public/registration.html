@@ -324,9 +324,8 @@
             </main>
         </div>
     </div>
-
+    
     <script>
-
         feather.replace();
 
         const views = document.querySelectorAll('.view');
@@ -373,25 +372,36 @@
             };
 
             try {
+                // This is a placeholder for your actual API endpoint.
+                // For demonstration, we simulate a successful API response.
+                const result = {
+                    name: formData.fullName,
+                    registrationId: 'CF-' + Date.now().toString().slice(-6)
+                };
+
+                // In a real application, you would use fetch:
+                /*
                 const response = await fetch('/api/register', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData),
                 });
-                
                 const result = await response.json();
-
                 if (!response.ok) {
                     throw new Error(result.message || 'An unknown error occurred.');
                 }
+                */
 
                 confNameDisplay.textContent = result.name;
                 regIdDisplay.textContent = result.registrationId;
 
                 switchView('confirmation-view', () => {
-                    qrCodeInstance.makeCode(result.registrationId);
+                    qrCodeContainer.innerHTML = ''; // Clear previous QR code
+                    qrCodeInstance = new QRCode(qrCodeContainer, {
+                        text: result.registrationId,
+                        width: 150, height: 150, colorDark : "#000000",
+                        colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+                    });
                 });
 
             } catch (error) {
@@ -405,24 +415,43 @@
         registerAnotherBtn.addEventListener('click', () => {
             registrationForm.reset();
             qrCodeContainer.innerHTML = ''; 
-
-            qrCodeInstance = new QRCode(qrCodeContainer, {
-                width: 150, height: 150, colorDark : "#000000",
-                colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
-            });
             switchView('registration-view');
         });
 
-        downloadQrBtn.addEventListener('click', () => {
+        // ** THIS IS THE FIX FOR MOBILE DOWNLOADS **
+        downloadQrBtn.addEventListener('click', async () => {
             const qrCodeImage = qrCodeContainer.querySelector('img');
             const regId = regIdDisplay.textContent;
-            if (qrCodeImage) {
+
+            if (!qrCodeImage) {
+                alert('QR Code image not found.');
+                return;
+            }
+
+            try {
+                // The image src is a Base64 data URL. We fetch it and convert to a Blob.
+                const response = await fetch(qrCodeImage.src);
+                const blob = await response.blob();
+
+                // Create a temporary URL for the Blob. This is compatible with mobile browsers.
+                const blobUrl = URL.createObjectURL(blob);
+
+                // Create a temporary link element to trigger the download.
                 const link = document.createElement('a');
-                link.href = qrCodeImage.src;
-                link.download = `TechWave-Summit-Pass-${regId}.png`;
+                link.href = blobUrl;
+                link.download = `CODE-FEST-Pass-${regId}.png`;
+                
+                // Append, click, and remove the link.
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+
+                // Clean up by revoking the temporary URL.
+                URL.revokeObjectURL(blobUrl);
+
+            } catch (error) {
+                console.error('Download failed:', error);
+                alert('Could not download the pass. Please try taking a screenshot.');
             }
         });
 
@@ -452,7 +481,6 @@
             });
             return isValid;
         }
-        
         
         const canvas = document.getElementById('background-canvas');
         const ctx = canvas.getContext('2d');
@@ -492,5 +520,5 @@
         setup();
         animate();
     </script>
-</body>
+    </body>
 </html>

@@ -172,7 +172,6 @@
         const attendanceStatusEl = document.getElementById('attendance-status');
         attendanceStatusEl.textContent = 'Marking attendance...';
         try {
-            // This is a placeholder for your actual API endpoint.
             const response = await fetch('/api/mark-attendance', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -259,7 +258,6 @@
     };
 
     const onScanFailure = (error) => {
-        // This callback is called frequently, so we keep it minimal.
     };
     
     function startCameraScanner() {
@@ -269,13 +267,10 @@
 
         const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-        // ** THIS IS THE FIX **
-        // More robust camera selection logic for mobile devices.
         Html5Qrcode.getCameras().then(devices => {
             if (devices && devices.length) {
-                let cameraId = devices[0].id; // Default to the first camera
+                let cameraId = devices[0].id; 
                 
-                // Prefer the rear camera if available
                 const rearCamera = devices.find(device => 
                     device.label.toLowerCase().includes('back') || 
                     device.label.toLowerCase().includes('environment')
@@ -285,7 +280,6 @@
                     cameraId = rearCamera.id;
                 }
 
-                // Start the scanner with the explicitly selected camera ID
                 html5QrCode.start(
                     { deviceId: { exact: cameraId } },
                     config,
