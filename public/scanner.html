@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    
+    <style>
+        :root {
+            --success-glow: rgba(90, 255, 150, 0.6);
+            --fail-glow: rgba(255, 90, 90, 0.6);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: 'Poppins', sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        #background-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background-image: linear-gradient(rgba(10, 10, 20, 0.85), rgba(10, 10, 20, 0.85)), url('https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+            background-size: cover; background-position: center;
+        }
+        .page-container {
+            display: flex;
+            width: 100%;
+            max-width: 1100px;
+            min-height: 90vh;
+            max-height: 700px;
+            margin: 5vh auto;
+            background-color: rgba(15, 15, 25, 0.5);
+            backdrop-filter: blur(12px) saturate(180%);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            overflow: hidden;
+        }
+        .info-panel {
+            flex-basis: 45%;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: rgba(0,0,0,0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .info-panel h1 { font-size: 2.2rem; margin-bottom: 1rem; }
+        .info-panel p { font-size: 1.1rem; color: rgba(255,255,255,0.8); line-height: 1.7; }
+        .scanner-panel { flex-basis: 55%; display: flex; justify-content: center; align-items: center; padding: 2rem; overflow-y: auto; }
+        .view { width: 100%; max-width: 450px; animation: fadeIn 0.6s ease-in-out; text-align: center; }
+        .view.hidden { display: none; }
+        #qr-reader { width: 100%; border-radius: 10px; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.2); margin-bottom: 1.5rem; }
+        #qr-reader-status { font-weight: 500; min-height: 24px; color: rgba(255,255,255,0.7); }
+        .separator { display: flex; align-items: center; text-align: center; color: rgba(255, 255, 255, 0.5); margin: 1.5rem 0; }
+        .separator::before, .separator::after { content: ''; flex: 1; border-bottom: 1px solid rgba(255, 255, 255, 0.2); }
+        .separator:not(:empty)::before { margin-right: .5em; } .separator:not(:empty)::after { margin-left: .5em; }
+        .action-btn { display: inline-block; padding: 12px 30px; text-decoration: none; color: #fff; border-radius: 50px; font-weight: 600; transition: all 0.3s ease; background: linear-gradient(90deg, #0052D4, #4364F7, #6FB1FC); border: none; cursor: pointer; width: 100%; }
+        .action-btn:hover { transform: scale(1.02); background: linear-gradient(90deg, #6FB1FC, #4364F7, #0052D4); }
+        .upload-btn { background: transparent; border: 1px solid rgba(255, 255, 255, 0.5); display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
+        .upload-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.8); }
+        .profile-card {
+            background: rgba(0,0,0,0.2);
+            padding: 2rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .profile-card.success { border-color: var(--success-glow); box-shadow: 0 0 20px var(--success-glow); }
+        .profile-card.failure { border-color: var(--fail-glow); box-shadow: 0 0 20px var(--fail-glow); }
+        .profile-header { display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .profile-header i { width: 60px; height: 60px; }
+        .profile-header h2 { font-size: 1.8rem; margin: 0; }
+        .profile-header.success i { color: #39e981; }
+        .profile-header.failure i { color: #ff8a8a; }
+        .profile-details { text-align: left; }
+        .detail-item { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .detail-item:last-child { border-bottom: none; }
+        .detail-item i { color: rgba(255,255,255,0.6); flex-shrink: 0; }
+        .detail-item strong { color: #fff; }
+        #failure-message { text-align: center; }
+        #failure-message p { margin-bottom: 1rem; }
+        #failure-message strong { word-break: break-all; font-size: 1.1rem; color: var(--fail-glow); }
+        #attendance-status { font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); margin-top: 1rem; min-height: 20px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 992px) {
+            body { padding: 0; overflow-y: auto; }
+            .page-container { flex-direction: column; height: auto; max-height: none; min-height: 100vh; margin: 0; border-radius: 0; }
+            .info-panel { border-right: none; text-align: center; padding: 2rem 1.5rem; }
+            .scanner-panel { padding: 2rem 1.5rem 3rem; }
+        }
+        @media (max-width: 600px) {
+            .info-panel h1 { font-size: 1.6rem; }
+            .info-panel p { font-size: 1rem; }
+            .profile-header h2 { font-size: 1.4rem; }
+            .profile-header i { width: 50px; height: 50px; }
+            .detail-item { font-size: 0.9rem; }
+            .action-btn { padding: 10px 20px; font-size: 0.9rem; }
+        }
+        @media (max-width: 400px) {
+            .info-panel { padding: 1.5rem 1rem; }
+            .scanner-panel { padding: 1.5rem 1rem 2rem; }
+            .info-panel h1 { font-size: 1.4rem; }
+            .info-panel p { font-size: 0.9rem; }
+            .profile-card { padding: 1.5rem; }
+            .detail-item { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="background-canvas"></canvas>
+    <div class="page-container">
+        <div class="info-panel">
+            <h1>Verification Point</h1>
+            <p>Use the scanner to verify attendee passes. A valid pass will display the registrant's details and mark their attendance.</p>
+            <p>Ensure the QR code is well-lit and centered in the viewfinder for a quick and accurate scan.</p>
+        </div>
+        <div class="scanner-panel">
+            <main>
+                <div id="scanner-view" class="view">
+                    <h2>Scan Event Pass</h2>
+                    <div id="qr-reader"></div>
+                    <p id="qr-reader-status">Requesting Camera Access...</p>
+                    <div class="separator">OR</div>
+                    <button id="upload-qr-btn" class="action-btn upload-btn"><i data-feather="upload"></i><span>Upload QR Code Image</span></button>
+                    <input type="file" id="qr-file-input" accept="image/*" style="display: none;">
+                </div>
+                <div id="result-view" class="view hidden">
+                    <div id="profile-card" class="profile-card">
+                        <div id="profile-header" class="profile-header">
+                            <i id="result-icon-svg" data-feather="check-circle"></i>
+                            <h2 id="result-title"></h2>
+                        </div>
+                         <p id="attendance-status"></p> <div id="success-details" class="profile-details">
+                             <div class="detail-item"><i data-feather="hash"></i><div><span>Registration ID</span><br><strong id="detail-id"></strong></div></div>
+                             <div class="detail-item"><i data-feather="user"></i><div><span>Full Name</span><br><strong id="detail-name"></strong></div></div>
+                             <div class="detail-item"><i data-feather="mail"></i><div><span>Email Address</span><br><strong id="detail-email"></strong></div></div>
+                             <div class="detail-item"><i data-feather="phone"></i><div><span>Phone Number</span><br><strong id="detail-phone"></strong></div></div>
+                             <div class="detail-item"><i data-feather="briefcase"></i><div><span>Institution</span><br><strong id="detail-institution"></strong></div></div>
+                        </div>
+                        <div id="failure-message" class="hidden">
+                             <p>This pass is not valid for the TechWave Summit.</p>
+                             <strong id="failed-id"></strong>
+                        </div>
+                    </div>
+                    <br><br>
+                    <button class="action-btn" id="scan-another-btn">Scan Another Pass</button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+    feather.replace();
+
+    const scannerView = document.getElementById('scanner-view');
+    const resultView = document.getElementById('result-view');
+    const statusElement = document.getElementById('qr-reader-status');
+    const scanAnotherBtn = document.getElementById('scan-another-btn');
+    const uploadQrBtn = document.getElementById('upload-qr-btn');
+    const qrFileInput = document.getElementById('qr-file-input');
+    const html5QrCode = new Html5Qrcode("qr-reader");
+
+    async function markAttendance(userData) {
+        const attendanceStatusEl = document.getElementById('attendance-status');
+        attendanceStatusEl.textContent = 'Marking attendance...';
+        try {
+            const response = await fetch('/api/mark-attendance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    registrationId: userData.id,
+                    fullName: userData.name
+                })
+            });
+            const result = await response.json();
+            attendanceStatusEl.textContent = result.message;
+        } catch (error) {
+            console.error('Failed to mark attendance:', error);
+            attendanceStatusEl.textContent = 'Error: Could not mark attendance.';
+        }
+    }
+
+    async function processScannedCode(decodedText) {
+        if (html5QrCode.isScanning) {
+            try { await html5QrCode.stop(); }
+            catch (err) { console.error("Failed to stop scanner.", err); }
+        }
+
+        scannerView.classList.add('hidden');
+        resultView.classList.remove('hidden');
+
+        const profileCard = document.getElementById('profile-card');
+        const profileHeader = document.getElementById('profile-header');
+        const resultIcon = document.getElementById('result-icon-svg');
+        const resultTitle = document.getElementById('result-title');
+        const successDetails = document.getElementById('success-details');
+        const failureMessage = document.getElementById('failure-message');
+        const attendanceStatusEl = document.getElementById('attendance-status');
+
+        resultTitle.textContent = 'Verifying Pass...';
+        attendanceStatusEl.textContent = '';
+        profileCard.className = 'profile-card';
+        successDetails.classList.add('hidden');
+        failureMessage.classList.add('hidden');
+
+        try {
+            const response = await fetch(`/api/verify/${decodedText}`);
+            if (response.ok) {
+                const userData = await response.json();
+                profileCard.className = 'profile-card success';
+                profileHeader.className = 'profile-header success';
+                resultIcon.outerHTML = '<i id="result-icon-svg" data-feather="check-circle"></i>';
+                resultTitle.textContent = 'Verified Registrant';
+
+                document.getElementById('detail-id').textContent = userData.id;
+                document.getElementById('detail-name').textContent = userData.name;
+                document.getElementById('detail-email').textContent = userData.email;
+                document.getElementById('detail-phone').textContent = userData.phone;
+                document.getElementById('detail-institution').textContent = userData.institution;
+
+                successDetails.classList.remove('hidden');
+                failureMessage.classList.add('hidden');
+
+                await markAttendance(userData);
+            } else {
+                profileCard.className = 'profile-card failure';
+                profileHeader.className = 'profile-header failure';
+                resultIcon.outerHTML = '<i id="result-icon-svg" data-feather="x-circle"></i>';
+                resultTitle.textContent = 'Verification Failed';
+                document.getElementById('failed-id').textContent = decodedText;
+
+                successDetails.classList.add('hidden');
+                failureMessage.classList.remove('hidden');
+            }
+        } catch (error) {
+            profileCard.className = 'profile-card failure';
+            resultTitle.textContent = 'Verification Error';
+            failureMessage.querySelector('p').textContent = 'An unexpected error occurred.';
+            document.getElementById('failed-id').textContent = `Scanned Code: ${decodedText}`;
+            successDetails.classList.add('hidden');
+            failureMessage.classList.remove('hidden');
+        }
+
+        feather.replace();
+    }
+
+    const onScanSuccess = (decodedText) => {
+        if (decodedText) { processScannedCode(decodedText); }
+    };
+    const onScanFailure = () => {};
+
+    function startCameraScanner() {
+        scannerView.classList.remove('hidden');
+        resultView.classList.add('hidden');
+        statusElement.textContent = "Starting Camera...";
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
+            .then(() => { statusElement.textContent = "Scanning for event pass..."; })
+            .catch(() => { statusElement.textContent = `Error: Please grant camera permissions.`; });
+    }
+
+    scanAnotherBtn.addEventListener('click', startCameraScanner);
+    uploadQrBtn.addEventListener('click', () => { qrFileInput.click(); });
+
+    qrFileInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const stopCameraIfNeeded = () => {
+            if (html5QrCode.isScanning) {
+                return html5QrCode.stop();
+            }
+            return Promise.resolve();
+        };
+
+        stopCameraIfNeeded().then(() => {
+            statusElement.textContent = "Scanning image...";
+            return html5QrCode.scanFile(file, true);
+        }).then(decodedText => {
+            processScannedCode(decodedText);
+        }).catch(err => {
+            processScannedCode("INVALID_QR_CODE");
+            console.error("Error scanning file: ", err);
+        }).finally(() => {
+            qrFileInput.value = '';
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', startCameraScanner);
+</script>
+
+</body>
+</html>

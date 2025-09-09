@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NSCC Galactic Gala</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background: #0f0f1f;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      color: #fff;
+    }
+    
+    #intro-video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 5;
+      transition: opacity 1.5s ease-out, visibility 1.5s;
+      filter: brightness(0.7);
+    }
+    
+    #intro-video-background.exit {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .stars, .stars2, .stars3 {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-repeat: repeat;
+      background-size: cover;
+      z-index: -1;
+    }
+    .stars {
+      background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+      animation: move-twink-back 200s linear infinite;
+    }
+    .stars2 {
+      background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+      animation: move-twink-back 150s linear infinite;
+    }
+    .stars3 {
+      background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+      animation: move-twink-back 100s linear infinite;
+    }
+
+    @keyframes move-twink-back {
+      from {background-position: 0 0;}
+      to {background-position: -10000px 5000px;}
+    }
+    
+    .intro {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      text-align: center;
+      padding: 0 5vw;
+    }
+
+    .intro span {
+      font-size: clamp(3rem, 12vw, 7rem); 
+      font-weight: 900;
+      opacity: 0;
+      transform: scale(0.5) rotate(-30deg);
+      animation: letterPop 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+      margin: 0 1vw;
+      background: linear-gradient(45deg, #ff6ec4, #7873f5, #4158D0, #C850C0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(255, 110, 196, 0.8);
+    }
+
+    .intro span:nth-child(1) { animation-delay: 0.2s; }
+    .intro span:nth-child(2) { animation-delay: 0.4s; }
+    .intro span:nth-child(3) { animation-delay: 0.6s; }
+    .intro span:nth-child(4) { animation-delay: 0.8s; }
+
+    @keyframes letterPop {
+      to { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    
+    .intro-subheading, .intro-tagline {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 1s forwards;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 400;
+      text-transform: uppercase;
+    }
+
+    .intro-subheading {
+      font-size: clamp(1rem, 3vw, 1.5rem); 
+      letter-spacing: 0.4em;
+      margin-bottom: 1rem;
+      animation-delay: 1.5s;
+    }
+
+    .intro-tagline {
+      font-size: clamp(0.9rem, 2.5vw, 1.2rem); 
+      letter-spacing: 0.5em;
+      margin-top: 1rem;
+      animation-delay: 1.8s;
+    }
+
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .intro.exit {
+      animation: zoomOut 1.5s forwards;
+    }
+
+    @keyframes zoomOut {
+      from { opacity: 1; transform: scale(1);}
+      to { opacity: 0; transform: scale(5); visibility: hidden; }
+    }
+
+    .container {
+      text-align: center;
+      z-index: 1;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInMain 1s forwards;
+      animation-delay: 4s;
+      background: rgba(15, 15, 31, 0.4);
+      backdrop-filter: blur(5px);
+      padding: 5vw;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      max-width: 90%;
+    }
+
+    @keyframes fadeInMain {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 9vw, 4rem); 
+      font-weight: 900;
+      background: linear-gradient(45deg, #ff6ec4, #7873f5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 35px rgba(255, 110, 196, 0.7);
+      animation: textGlow 2s infinite alternate;
+    }
+
+    @keyframes textGlow {
+      from { text-shadow: 0 0 35px rgba(255, 110, 196, 0.7); }
+      to { text-shadow: 0 0 50px rgba(120, 115, 245, 0.9); }
+    }
+
+    p {
+      font-size: clamp(1.2rem, 3.5vw, 1.5rem); 
+      margin-bottom: 2rem;
+      opacity: 0.9;
+      letter-spacing: 1px;
+    }
+
+    .start-btn {
+      padding: 1em 3em;
+      font-size: clamp(1.2rem, 4vw, 1.6rem); 
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(45deg, #ff416c, #ff4b2b);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0 0 25px rgba(255, 65, 108, 0.7);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .start-btn::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.5s, height 0.5s;
+    }
+    
+    .start-btn:hover::before {
+      width: 250px;
+      height: 250px;
+    }
+
+    .start-btn:hover {
+      animation-play-state: paused;
+      transform: scale(1.1);
+      box-shadow: 0 0 50px rgba(255, 65, 108, 1);
+    }
+    
+    .start-btn:active {
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 480px) {
+      .intro span { margin: 0 4px; }
+      .container { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars"></div>
+  <div class="stars2"></div>
+  <div class="stars3"></div>
+
+  <video autoplay loop muted playsinline id="intro-video-background">
+    <source src="video.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
+  <div class="intro">
+    <div>
+      <p class="intro-subheading"> SRM UNIVERSITY</p>
+      <div>
+        <span>N</span><span>S</span><span>C</span><span>C</span>
+      </div>
+      <p class="intro-tagline">P R E S E N T S</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>🎉 CODE  FEST</h1>
+    <p>Prepare for an unforgettable night of music, codes, and energy!</p>
+    <button class="start-btn" onclick="startEvent()">Launch</button>
+  </div>
+
+  <script>
+    function startEvent() {
+      const container = document.querySelector('.container');
+      container.style.transition = 'opacity 0.5s, transform 0.5s';
+      container.style.opacity = '0';
+      container.style.transform = 'translateY(50px)';
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 500);
+    }
+
+    window.addEventListener('load', () => {
+      const introText = document.querySelector(".intro");
+      const introVideo = document.querySelector("#intro-video-background");
+
+      setTimeout(() => {
+        introText.classList.add("exit");
+        introVideo.classList.add("exit");
+      }, 2500); 
+    });
+  </script>
+
+</body>
+</html>

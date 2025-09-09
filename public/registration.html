@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Registration</title>
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Icon Library (Feather Icons) -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <!-- QR Code Generation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-glow: rgba(200, 90, 255, 0.5);
+            --secondary-glow: rgba(90, 200, 255, 0.5);
+        }
+
+        /* --- Global Styles & Resets --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            display: flex;
+            color: #ffffff;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        
+        #background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: linear-gradient(rgba(10, 10, 20, 0.85), rgba(10, 10, 20, 0.85)), url('https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .page-container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            max-height: 750px;
+            background-color: rgba(15, 15, 25, 0.5);
+            backdrop-filter: blur(12px) saturate(180%);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            overflow: hidden;
+        }
+
+        /* --- Left Info Panel --- */
+        .info-panel {
+            flex-basis: 40%;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: rgba(0,0,0,0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .logo-container svg {
+            width: 50px;
+            height: 50px;
+        }
+
+        .logo-container h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .info-panel .tagline {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+        
+        .benefits-list {
+            list-style: none;
+        }
+        
+        .benefits-list li {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: slideInFromLeft 0.5s forwards;
+        }
+        
+        .benefits-list li:nth-child(1) { animation-delay: 0.2s; }
+        .benefits-list li:nth-child(2) { animation-delay: 0.4s; }
+        .benefits-list li:nth-child(3) { animation-delay: 0.6s; }
+        
+        .benefits-list i {
+            color: var(--secondary-glow);
+            flex-shrink: 0;
+        }
+
+        /* --- Right Form Panel --- */
+        .form-panel {
+            flex-basis: 60%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .view {
+            width: 100%;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .view.hidden { display: none; }
+        
+        .form-container, .confirmation-container {
+            width: 100%;
+            max-width: 450px;
+            margin: auto;
+            background-color: transparent;
+            backdrop-filter: none;
+            border-radius: 0;
+            border: none;
+            padding: 0;
+            text-align: center;
+            box-shadow: none;
+        }
+
+        .form-container h2, .confirmation-container h2 { font-size: 2rem; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: rgba(255, 255, 255, 0.8); }
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .form-group input:focus { outline: none; border-color: var(--secondary-glow); box-shadow: 0 0 10px var(--secondary-glow); }
+
+        .error-message { color: #ff8a8a; font-size: 0.9rem; margin-top: 5px; display: none; }
+        .form-actions { display: flex; justify-content: center; margin-top: 1.5rem; gap: 1rem; flex-wrap: wrap; }
+        
+        .action-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            text-decoration: none;
+            color: #fff;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: transform 0.3s ease, background 0.3s ease;
+            background: linear-gradient(90deg, #1d2671, #c33764);
+            border: none;
+            cursor: pointer;
+            flex-grow: 1;
+            min-width: 140px;
+        }
+        .action-btn:hover { transform: scale(1.02); background: linear-gradient(90deg, #c33764, #1d2671); }
+        
+        .download-btn {
+             background: linear-gradient(90deg, #0052D4, #4364F7, #6FB1FC);
+        }
+        .download-btn:hover {
+            background: linear-gradient(90deg, #6FB1FC, #4364F7, #0052D4);
+        }
+
+        #qrcode { 
+            margin: 0 auto 1.5rem; 
+            background: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            width: 180px; 
+            height: 180px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        }
+        #reg-id-display { 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            letter-spacing: 1.5px; 
+            color: #fff; 
+            background: rgba(0,0,0,0.3); 
+            padding: 8px 15px; 
+            border-radius: 5px; 
+            word-break: break-all; 
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInFromLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        
+        /* --- Responsive Design --- */
+        @media (max-width: 992px) {
+            body { padding: 0; overflow-y: auto; }
+            .page-container {
+                flex-direction: column;
+                height: auto;
+                max-height: none;
+                border-radius: 0;
+                width: 100%;
+                min-height: 100vh;
+            }
+            .info-panel { 
+                border-right: none; 
+                text-align: center; 
+                padding: 2rem 1.5rem;
+            }
+            .logo-container { justify-content: center; }
+            .form-panel { padding: 2rem 1.5rem 3rem; }
+        }
+
+        @media (max-width: 600px) {
+            .logo-container h1 { font-size: 1.5rem; }
+            .info-panel .tagline { font-size: 1rem; margin-bottom: 1.5rem; }
+            .benefits-list li { font-size: 0.9rem; }
+            .form-container h2, .confirmation-container h2 { font-size: 1.5rem; }
+            #qrcode { width: 140px; height: 140px; padding: 10px; }
+            #reg-id-display { font-size: 1rem; }
+            .action-btn { padding: 10px 18px; font-size: 0.9rem; }
+        }
+
+        @media (max-width: 400px) {
+            .info-panel { padding: 1.5rem 1rem; }
+            .form-panel { padding: 1.5rem 1rem 2rem; }
+            .logo-container svg { width: 40px; height: 40px; }
+            .logo-container h1 { font-size: 1.2rem; }
+            .form-group input { padding: 10px 12px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="background-canvas"></canvas>
+
+    <div class="page-container">
+        <!-- Left Info Panel -->
+        <div class="info-panel">
+            <div class="logo-container">
+                 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5ac8ff"/><stop offset="100%" stop-color="#c85aff"/></linearGradient></defs>
+                  <path fill="url(#g)" d="M50,5 C74.85,5 95,25.15 95,50 C95,74.85 74.85,95 50,95 C25.15,95 5,74.85 5,50 C5,25.15 25.15,5 50,5 Z M50,15 C30.67,15 15,30.67 15,50 C15,69.33 30.67,85 50,85 C69.33,85 85,69.33 85,50 C85,30.67 69.33,15 50,15 Z M50,25 L50,40 L65,50 L50,60 L50,75 L75,50 Z"/>
+                </svg>
+                <h1>CODE FEST</h1>
+            </div>
+            <p class="tagline">Join innovators, leaders, and thinkers shaping the future of technology. Register now for exclusive access.</p>
+            <ul class="benefits-list">
+                <li><i data-feather="users"></i><span>Network with industry professionals.</span></li>
+                <li><i data-feather="mic"></i><span>Gain insights from expert speakers.</span></li>
+                <li><i data-feather="gift"></i><span>Receive exclusive content and swag.</span></li>
+            </ul>
+        </div>
+
+        <!-- Right Form Panel -->
+        <div class="form-panel">
+            <main>
+                <!-- Registration Form View -->
+                <div id="registration-view" class="view">
+                    <div class="form-container">
+                        <h2>Create Your Pass</h2>
+                        <form id="registration-form">
+                            <div class="form-group">
+                                <label for="fullName">Full Name</label>
+                                <input type="text" id="fullName" required>
+                                <p class="error-message" id="fullNameError"></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" required>
+                                <p class="error-message" id="emailError"></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone" required>
+                                <p class="error-message" id="phoneError"></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="institution">Institution / Company</label>
+                                <input type="text" id="institution" required>
+                                <p class="error-message" id="institutionError"></p>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="action-btn">Generate ID & QR Code</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Registration Confirmation View -->
+                <div id="confirmation-view" class="view hidden">
+                    <div class="confirmation-container">
+                        <h2>Registration Successful!</h2>
+                        <p>Welcome, <strong id="conf-name"></strong>! Please save your event pass below.</p>
+                        <div class="confirmation-details">
+                            <div id="qrcode"></div>
+                            <p>Your Registration ID is:</p>
+                            <div id="reg-id-display"></div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="download-qr-btn" class="action-btn download-btn">Download Pass</button>
+                            <button type="button" id="register-another-btn" class="action-btn">Register Another</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // --- THIS ENTIRE SCRIPT SECTION IS UPDATED TO CONNECT TO THE SERVER ---
+
+        feather.replace();
+
+        const views = document.querySelectorAll('.view');
+        const registrationForm = document.getElementById('registration-form');
+        const qrCodeContainer = document.getElementById('qrcode');
+        const regIdDisplay = document.getElementById('reg-id-display');
+        const confNameDisplay = document.getElementById('conf-name');
+        const registerAnotherBtn = document.getElementById('register-another-btn');
+        const downloadQrBtn = document.getElementById('download-qr-btn');
+        const submitBtn = registrationForm.querySelector('button[type="submit"]');
+
+        function switchView(viewId, callback) {
+            views.forEach(view => view.classList.add('hidden'));
+            const newView = document.getElementById(viewId);
+            if (newView) {
+                newView.classList.remove('hidden');
+                if (callback && typeof callback === 'function') {
+                    setTimeout(callback, 50);
+                }
+            }
+        }
+
+        let qrCodeInstance = new QRCode(qrCodeContainer, {
+            width: 150,
+            height: 150,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        registrationForm.addEventListener('submit', async function(e) {
+            e.preventDefault(); 
+            if (!validateForm()) return; 
+
+            const originalButtonText = submitBtn.textContent;
+            submitBtn.textContent = 'Processing...';
+            submitBtn.disabled = true;
+
+            const formData = {
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                institution: document.getElementById('institution').value,
+            };
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+                
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'An unknown error occurred.');
+                }
+
+                confNameDisplay.textContent = result.name;
+                regIdDisplay.textContent = result.registrationId;
+
+                switchView('confirmation-view', () => {
+                    qrCodeInstance.makeCode(result.registrationId);
+                });
+
+            } catch (error) {
+                alert(`Registration failed: ${error.message}`);
+            } finally {
+                submitBtn.textContent = originalButtonText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        registerAnotherBtn.addEventListener('click', () => {
+            registrationForm.reset();
+            qrCodeContainer.innerHTML = ''; 
+
+            qrCodeInstance = new QRCode(qrCodeContainer, {
+                width: 150, height: 150, colorDark : "#000000",
+                colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+            });
+            switchView('registration-view');
+        });
+
+        downloadQrBtn.addEventListener('click', () => {
+            const qrCodeImage = qrCodeContainer.querySelector('img');
+            const regId = regIdDisplay.textContent;
+            if (qrCodeImage) {
+                const link = document.createElement('a');
+                link.href = qrCodeImage.src;
+                link.download = `TechWave-Summit-Pass-${regId}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        });
+
+        function validateForm() {
+            let isValid = true;
+            const fields = ['fullName', 'email', 'phone', 'institution'];
+            fields.forEach(id => {
+                const input = document.getElementById(id);
+                const error = document.getElementById(id + 'Error');
+                let fieldIsValid = true;
+                
+                error.textContent = 'This field cannot be empty.';
+
+                if (input.value.trim() === '') {
+                    fieldIsValid = false;
+                } else if (id === 'email' && !/^\S+@\S+\.\S+$/.test(input.value)) {
+                    error.textContent = 'Please enter a valid email.';
+                    fieldIsValid = false;
+                }
+                
+                if(!fieldIsValid) {
+                    error.style.display = 'block';
+                    isValid = false;
+                } else {
+                    error.style.display = 'none';
+                }
+            });
+            return isValid;
+        }
+        
+        
+        const canvas = document.getElementById('background-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, time = 0;
+        
+        function setup(){
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        function animate(){
+            time += 0.005;
+            ctx.clearRect(0, 0, width, height);
+
+            const gradient1 = ctx.createRadialGradient(
+                width / 2 + Math.sin(time) * width/4, height / 2 + Math.cos(time) * height/4, 0,
+                width / 2, height / 2, Math.min(width, height) / 2
+            );
+            gradient1.addColorStop(0, 'rgba(90, 200, 255, 0.1)');
+            gradient1.addColorStop(1, 'rgba(90, 200, 255, 0)');
+            ctx.fillStyle = gradient1;
+            ctx.fillRect(0, 0, width, height);
+
+            const gradient2 = ctx.createRadialGradient(
+                width / 2 + Math.cos(time) * width/3, height / 2 + Math.sin(time) * height/3, 0,
+                width / 2, height / 2, Math.min(width, height) / 2
+            );
+            gradient2.addColorStop(0, 'rgba(200, 90, 255, 0.1)');
+            gradient2.addColorStop(1, 'rgba(200, 90, 255, 0)');
+            ctx.fillStyle = gradient2;
+            ctx.fillRect(0, 0, width, height);
+            
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', setup);
+        setup();
+        animate();
+    </script>
+</body>
+</html>
